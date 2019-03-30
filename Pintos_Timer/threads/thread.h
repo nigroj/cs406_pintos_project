@@ -107,7 +107,6 @@ struct thread
 
 /* For timer_sleep */
 static struct list sleeping_threads;
-//static struct list ready_threads;
 void thread_real_sleep(int64_t);
 void wakeup_schedule();
 

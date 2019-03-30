@@ -37,6 +37,9 @@ static struct thread *initial_thread;
 /* Lock used by allocate_tid(). */
 static struct lock tid_lock;
 
+/* For timer_sleep */
+static struct list sleeping_threads;
+
 /* Stack frame for kernel_thread(). */
 struct kernel_thread_frame 
   {
@@ -93,6 +96,8 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
 
+  //list_init (&ready_threads);
+  list_init (&sleeping_threads);
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
@@ -555,6 +560,7 @@ thread_schedule_tail (struct thread *prev)
 static void
 schedule (void) 
 {
+
   struct thread *cur = running_thread ();
   struct thread *next = next_thread_to_run ();
   struct thread *prev = NULL;
@@ -566,6 +572,25 @@ schedule (void)
   if (cur != next)
     prev = switch_threads (cur, next);
   thread_schedule_tail (prev);
+/*
+  //for thread_real_sleep
+  struct list_elem *t = list_begin(&sleeping_threads);
+  struct list_elem *random = list_begin(&sleeping_threads);
+
+  int64_t curr_ticks = timer_ticks();
+  while (t != list_end(&sleeping_threads)) { //iterate
+    struct thread *temp = list_entry(t, struct thread, allelem);
+    if (curr_ticks >= temp->wakeup_time) {
+      list_push_back(&ready_list, &temp->elem); //wake up thread$
+      temp->status = THREAD_READY; //change state
+      random = t;
+      t = list_next(t); //change "linked list"
+      list_remove(random);
+    } else {
+      t = list_next(t);
+    }
+  }
+*/
 }
 
 /* Returns a tid to use for a new thread. */
@@ -581,7 +606,30 @@ allocate_tid (void)
 
   return tid;
 }
-
+
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+
+/* For timer_sleep */
+void thread_real_sleep(int64_t ticks)
+{
+  struct thread *cur = thread_current ();
+  enum intr_level old_level;
+
+  //ASSERT (!intr_context ());
+  //ASSERT (is_thread(cur));
+
+  old_level = intr_disable ();
+  if (cur != idle_thread) {
+    list_push_back (&sleeping_threads, &cur->elem);
+    //cur->status = THREAD_BLOCKED;
+    cur->wakeup_time = ticks + timer_ticks();
+    //schedule ();
+    thread_block();
+  }
+  intr_set_level (old_level);
+
+}
+

@@ -1,0 +1,26 @@
+qemu-system-i386 -hda /tmp/TuzaJqvhYH.dsk -m 4 -net none -nographic -monitor null
+PiLo hda1
+Loading...........
+Kernel command line: -q run alarm-multiple
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  471,040,000 loops/s.
+Boot complete.
+Executing 'alarm-multiple':
+(alarm-multiple) begin
+(alarm-multiple) Creating 5 threads to sleep 7 times each.
+(alarm-multiple) Thread 0 sleeps 10 ticks each time,
+(alarm-multiple) thread 1 sleeps 20 ticks each time, and so on.
+(alarm-multiple) If successful, product of iteration count and
+(alarm-multiple) sleep duration will appear in nondescending order.
+Kernel PANIC at ../../threads/thread.c:567 in schedule(): assertion `is_thread (next)' failed.
+Call stack: 0xc00276eb.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 49 ticks
+Thread: 1 idle ticks, 48 kernel ticks, 0 user ticks
+Console: 906 characters output
+Keyboard: 0 keys pressed
+Powering off...

@@ -1,0 +1,5 @@
+FAIL
+Kernel panic in run: PANIC at ../../threads/thread.c:276 in thread_current(): assertion `t->status == THREAD_RUNNING' failed.
+Call stack: 0xc00275dc
+Translation of call stack:
+0xc00275dc: debug_panic (.../../lib/kernel/debug.c:38)

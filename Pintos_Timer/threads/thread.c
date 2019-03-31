@@ -93,7 +93,6 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
 
-  //list_init (&ready_threads);
   list_init (&sleeping_threads);
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -346,6 +345,9 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = new_priority;
+  if (new_priority != PRI_MAX) {
+    thread_yield();
+  }
 }
 
 /* Returns the current thread's priority. */
@@ -558,18 +560,6 @@ static void
 schedule (void) 
 {
 
-  struct thread *cur = running_thread ();
-  struct thread *next = next_thread_to_run ();
-  struct thread *prev = NULL;
-
-  ASSERT (intr_get_level () == INTR_OFF);
-  ASSERT (cur->status != THREAD_RUNNING);
-  ASSERT (is_thread (next));
-
-  if (cur != next)
-    prev = switch_threads (cur, next);
-  thread_schedule_tail (prev);
-/*
   //for thread_real_sleep
   struct list_elem *t = list_begin(&sleeping_threads);
   struct list_elem *random = list_begin(&sleeping_threads);
@@ -587,7 +577,22 @@ schedule (void)
       t = list_next(t);
     }
   }
-*/
+
+
+  struct thread *cur = running_thread ();
+  struct thread *next = next_thread_to_run ();
+  struct thread *prev = NULL;
+
+  ASSERT (intr_get_level () == INTR_OFF);
+  ASSERT (cur->status != THREAD_RUNNING);
+  ASSERT (is_thread (next));
+
+  if (cur != next)
+    prev = switch_threads (cur, next);
+  thread_schedule_tail (prev);
+
+
+
 }
 
 /* Returns a tid to use for a new thread. */
@@ -623,8 +628,8 @@ void thread_real_sleep(int64_t ticks)
     list_push_back (&sleeping_threads, &cur->elem);
     //cur->status = THREAD_BLOCKED;
     cur->wakeup_time = ticks + timer_ticks();
-    //schedule ();
     thread_block();
+    schedule();
   }
   intr_set_level (old_level);
 

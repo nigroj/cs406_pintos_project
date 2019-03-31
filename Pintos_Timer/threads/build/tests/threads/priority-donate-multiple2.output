@@ -1,4 +1,4 @@
-qemu-system-i386 -hda /tmp/uP974Z0G8M.dsk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -hda /tmp/fddwBMt_uk.dsk -m 4 -net none -nographic -monitor null
 PiLo hda1
 Loading...........
 Kernel command line: -q run priority-donate-multiple2
@@ -16,8 +16,8 @@ Executing 'priority-donate-multiple2':
 (priority-donate-multiple2) Main thread should have priority 31.  Actual priority: 31.
 (priority-donate-multiple2) end
 Execution of 'priority-donate-multiple2' complete.
-Timer: 49 ticks
-Thread: 0 idle ticks, 49 kernel ticks, 0 user ticks
+Timer: 48 ticks
+Thread: 0 idle ticks, 48 kernel ticks, 0 user ticks
 Console: 876 characters output
 Keyboard: 0 keys pressed
 Powering off...

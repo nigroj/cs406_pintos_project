@@ -1,7 +1,6 @@
 Use of literal control characters in variable names is deprecated at /usr/local/pintos/install/pintos line 913.
 Prototype mismatch: sub main::SIGVTALRM () vs none at /usr/local/pintos/install/pintos line 937.
 Constant subroutine SIGVTALRM redefined at /usr/local/pintos/install/pintos line 929.
-WARNING: Image format was not specified for '/tmp/dB1XXDEmye.dsk' and probing guessed raw.
+WARNING: Image format was not specified for '/tmp/y9Gt8sHo0O.dsk' and probing guessed raw.
          Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
          Specify the 'raw' format explicitly to remove the restrictions.
-qemu-system-i386: terminating on signal 2 from pid 22541

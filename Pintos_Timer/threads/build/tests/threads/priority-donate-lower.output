@@ -1,4 +1,4 @@
-qemu-system-i386 -hda /tmp/Y_N0Zg7T5X.dsk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -hda /tmp/FrNEjvNwje.dsk -m 4 -net none -nographic -monitor null
 PiLo hda1
 Loading...........
 Kernel command line: -q run priority-donate-lower

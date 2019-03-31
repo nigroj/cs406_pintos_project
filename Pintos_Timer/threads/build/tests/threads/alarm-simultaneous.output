@@ -1,24 +1,24 @@
-qemu-system-i386 -hda /tmp/IOI2wOUdQ1.dsk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -hda /tmp/kSJURIZNiO.dsk -m 4 -net none -nographic -monitor null
 PiLo hda1
 Loading...........
 Kernel command line: -q run alarm-simultaneous
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  471,040,000 loops/s.
+Calibrating timer...  444,825,600 loops/s.
 Boot complete.
 Executing 'alarm-simultaneous':
 (alarm-simultaneous) begin
 (alarm-simultaneous) Creating 3 threads to sleep 5 times each.
 (alarm-simultaneous) Each thread sleeps 10 ticks each time.
 (alarm-simultaneous) Within an iteration, all threads should wake up on the same tick.
-Kernel PANIC at ../../threads/thread.c:567 in schedule(): assertion `is_thread (next)' failed.
-Call stack: 0xc00276eb.
+Kernel PANIC at ../../threads/thread.c:588 in schedule(): assertion `is_thread (next)' failed.
+Call stack: 0xc00276ea 0.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
 Timer: 49 ticks
-Thread: 1 idle ticks, 48 kernel ticks, 0 user ticks
-Console: 821 characters output
+Thread: 0 idle ticks, 49 kernel ticks, 0 user ticks
+Console: 823 characters output
 Keyboard: 0 keys pressed
 Powering off...

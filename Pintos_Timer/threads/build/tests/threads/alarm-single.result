@@ -1,5 +1,5 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/thread.c:567 in schedule(): assertion `is_thread (next)' failed.
-Call stack: 0xc00276eb
+Kernel panic in run: PANIC at ../../threads/thread.c:588 in schedule(): assertion `is_thread (next)' failed.
+Call stack: 0xc00276ea
 Translation of call stack:
-0xc00276eb: debug_panic (.../../lib/kernel/debug.c:38)
+0xc00276ea: debug_panic (.../../lib/kernel/debug.c:38)

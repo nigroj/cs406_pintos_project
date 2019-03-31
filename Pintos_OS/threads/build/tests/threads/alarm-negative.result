@@ -1,5 +1,0 @@
-FAIL
-Kernel panic in run: PANIC at ../../threads/thread.c:567 in schedule(): assertion `is_thread (next)' failed.
-Call stack: 0xc00276c6
-Translation of call stack:
-0xc00276c6: debug_panic (.../../lib/kernel/debug.c:38)

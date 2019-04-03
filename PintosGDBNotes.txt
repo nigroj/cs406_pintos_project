@@ -1,0 +1,2 @@
+pintos-gdb kernel.o
+pintos --gdb -- run alarm-single 

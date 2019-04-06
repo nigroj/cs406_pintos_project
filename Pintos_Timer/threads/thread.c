@@ -217,6 +217,12 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
+  old_level = intr_disable(); 
+  /* Check whether the new thread should yield cpu time */
+  check_yield_cpu(); 
+  intr_set_level(old_level); 
+
+
   return tid;
 }
 
@@ -405,7 +411,7 @@ thread_get_recent_cpu (void)
   /* Not yet implemented. */
   return 0;
 }
-
+
 /* Idle thread.  Executes when no other thread is ready to run.
 
    The idle thread is initially put on the ready list by
@@ -454,7 +460,7 @@ kernel_thread (thread_func *function, void *aux)
   function (aux);       /* Execute the thread function. */
   thread_exit ();       /* If function() returns, kill the thread. */
 }
-
+
 /* Returns the running thread. */
 struct thread *
 running_thread (void) 
@@ -632,6 +638,17 @@ allocate_tid (void)
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
 
+void check_yield_cpu(void) {
+  struct thread *t;
+
+  if(list_empty(&ready_list))
+    return;
+
+  t = list_entry(list_front(&ready_list), struct thread, elem)
+
+  if ((thread_current() -> priority) < t -> priority)
+    thread_yield(); 
+}
 
 /* For timer_sleep */
 void thread_real_sleep(int64_t ticks)

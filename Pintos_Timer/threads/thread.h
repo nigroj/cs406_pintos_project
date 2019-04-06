@@ -114,6 +114,8 @@ void thread_real_sleep(int64_t);
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
+void check_yield_cpu(void); 
+
 void thread_init (void);
 void thread_start (void);
 

@@ -106,9 +106,8 @@ struct thread
   };
 
 /* For timer_sleep */
-static struct list sleeping_threads;
 void thread_real_sleep(int64_t);
-void wakeup_schedule();
+
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.

@@ -37,6 +37,10 @@ static struct thread *initial_thread;
 /* Lock used by allocate_tid(). */
 static struct lock tid_lock;
 
+/* For timer_sleep */
+static struct list sleeping_threads;
+
+
 /* Stack frame for kernel_thread(). */
 struct kernel_thread_frame 
   {
@@ -58,6 +62,9 @@ static unsigned thread_ticks;   /* # of timer ticks since last yield. */
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
+
+/* For priority */
+#define DEPTH_LIMIT 8
 
 static void kernel_thread (thread_func *, void *aux);
 
@@ -246,7 +253,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  list_insert_ordered (&ready_list, &t->elem, (list_less_func *) &change_priority, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -344,10 +351,15 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
+  enum intr_level old_level;
+  old_level = intr_disable();
+  int old_pri = thread_get_priority();
   thread_current ()->priority = new_priority;
-  if (new_priority != PRI_MAX) {
+  if (new_priority < old_pri) {
     thread_yield();
   }
+
+  intr_set_level(old_level);
 }
 
 /* Returns the current thread's priority. */
@@ -566,13 +578,14 @@ schedule (void)
 
   int64_t curr_ticks = timer_ticks();
   while (t != list_end(&sleeping_threads)) { //iterate
-    struct thread *temp = list_entry(t, struct thread, allelem);
+    struct thread *temp = list_entry(t, struct thread, elem);
     if (curr_ticks >= temp->wakeup_time) {
-      list_push_back(&ready_list, &temp->elem); //wake up thread$
-      temp->status = THREAD_READY; //change state
+
       random = t;
       t = list_next(t); //change "linked list"
       list_remove(random);
+      thread_unblock(temp);
+
     } else {
       t = list_next(t);
     }
@@ -617,19 +630,20 @@ uint32_t thread_stack_ofs = offsetof (struct thread, stack);
 /* For timer_sleep */
 void thread_real_sleep(int64_t ticks)
 {
-  struct thread *cur = thread_current ();
   enum intr_level old_level;
+
+  old_level = intr_disable ();
+
+  struct thread *cur = thread_current ();
 
   ASSERT (!intr_context ());
   ASSERT (is_thread(cur));
 
-  old_level = intr_disable ();
   if (cur != idle_thread) {
-    list_push_back (&sleeping_threads, &cur->elem);
+    list_push_front (&sleeping_threads, &cur->elem);
     //cur->status = THREAD_BLOCKED;
     cur->wakeup_time = ticks + timer_ticks();
     thread_block();
-    schedule();
   }
   intr_set_level (old_level);
 

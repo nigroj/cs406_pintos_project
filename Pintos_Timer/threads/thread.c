@@ -359,8 +359,8 @@ thread_set_priority (int new_priority)
 {
   enum intr_level old_level;
   old_level = intr_disable();
-  int old_pri = thread_get_priority();
 
+  int old_pri = thread_get_priority();
   thread_current() -> init_priority = new_priority;
 
   update_priority();
@@ -376,8 +376,13 @@ thread_set_priority (int new_priority)
 
 /* Returns the current thread's priority. */
 int
-thread_get_priority (void) 
-{
+thread_get_priority (void) {
+  /* Our implementation */ 
+  enum intr_level old_level; 
+  old_level = intr_disable(); 
+
+  intr_set_level(old_level); 
+
   return thread_current ()->priority;
 }
 
@@ -497,6 +502,12 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+
+  /* Implement later */
+  // t->wait_on_lock = NULL;
+  // list_init(&t -> donation_list); 
+  // t-> init_priority = priority; 
+
   list_push_back (&all_list, &t->allelem);
 }
 
@@ -648,6 +659,22 @@ void check_yield_cpu(void) {
 
   if ((thread_current() -> priority) < t -> priority)
     thread_yield(); 
+}
+
+void update_priority(void) {
+  struct thread *cur_t;
+  struct thread *new_t; 
+
+  cur_t = thread_current();
+  cur_t -> priority = cur_t -> init_priority; // put cur th prior to init_priority
+
+  if (list_empty(&cur_t -> donation_list))
+    return;
+
+  new_t = list_entry(list_front(&cur_t -> donation_list), struct thread, donation_list_elem); 
+
+  if ((new_t -> priority) > (cur_t -> priority))
+    cur_t -> priority = new_t -> priority; 
 }
 
 /* For timer_sleep */

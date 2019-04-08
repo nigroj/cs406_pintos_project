@@ -94,6 +94,12 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
+    struct list donation_list; 
+    struct list_elem donation_list_elem; 
+
+    // for thread set priority: 
+    int init_priority; 
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -115,6 +121,7 @@ void thread_real_sleep(int64_t);
 extern bool thread_mlfqs;
 
 void check_yield_cpu(void); 
+void update_priority(void);
 
 void thread_init (void);
 void thread_start (void);

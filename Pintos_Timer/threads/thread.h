@@ -120,8 +120,12 @@ void thread_real_sleep(int64_t);
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
+/* For priority */
 void check_yield_cpu(void); 
 void update_priority(void);
+void donate_priority();
+void remove_lock(struct lock *);
+void compare_priority(struct list_elem, struct list_elem);
 
 void thread_init (void);
 void thread_start (void);

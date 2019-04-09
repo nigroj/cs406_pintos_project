@@ -677,6 +677,39 @@ void update_priority(void) {
     cur_t -> priority = new_t -> priority; 
 }
 
+void donate_priority() {
+  int depth = 0;
+  struct thread *t = thread_current();
+  struct lock *l = t->wait_on_lock;
+
+  while (l && depth < DEPTH_LIMIT) {
+    ++depth;
+    if (l->holder == NULL) { return; } //no thread holding lock rn
+    if (l->holder->priority >= t->priority) { return; } //lock holder priority higher than current
+    l = t->wait_on_lock;
+  }
+}
+
+void remove_lock(struct lock *l) {
+  struct list_elem *e = list_begin(&thread_current()->donation_list);
+  struct thread *t;
+  while (e != list_end(&thread_current()->donation_list) { //iterate
+    t = list_entry(e, struct thread, donation_list_elem);
+    if (t->wait_on_lock == lock) {
+      list_remove(e);
+    }
+    e = list_next(e);
+  }
+}
+
+bool compare_priority (struct list_elem *a, struct list_elem *b) {
+  struct thread *t1 = list_entry(a, struct thread, elem);
+  struct thread *t2 = list_entry(b, struct thread, elem);
+
+  if (t1->priority > t2->priority) { return true;}
+  return false;
+}
+
 /* For timer_sleep */
 void thread_real_sleep(int64_t ticks)
 {

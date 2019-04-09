@@ -365,9 +365,9 @@ thread_set_priority (int new_priority)
 
   update_priority();
 
-  if (old_pri < thread_current()->priority) {
+  if (old_pri < thread_current()->priority) { //priority raised
     donate_priority();
-  } else if (old_pri > thread_current()->priority) {
+  } else if (old_pri > thread_current()->priority) { //priority lowered
     check_yield_cpu();
   }
 
@@ -645,8 +645,7 @@ allocate_tid (void)
   return tid;
 }
 
-/* Offset of `stack' member within `struct thread'.
-   Used by switch.S, which can't figure it out on its own. */
+/* Offset of `stack' member within `struct thread' used by switch.S*/
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
 
 void check_yield_cpu(void) {
@@ -656,7 +655,6 @@ void check_yield_cpu(void) {
     return;
 
   t = list_entry(list_front(&ready_list), struct thread, elem);
-
   if ((thread_current() -> priority) < t -> priority)
     thread_yield(); 
 }
@@ -666,17 +664,19 @@ void update_priority(void) {
   struct thread *new_t; 
 
   cur_t = thread_current();
-  cur_t -> priority = cur_t -> init_priority; // put cur th prior to init_priority
+  cur_t -> priority = cur_t -> init_priority; // put cur_t's priority to init_priority
 
   if (list_empty(&cur_t -> donation_list))
     return;
 
   new_t = list_entry(list_front(&cur_t -> donation_list), struct thread, donation_list_elem); 
 
+  //update to new priority
   if ((new_t -> priority) > (cur_t -> priority))
     cur_t -> priority = new_t -> priority; 
 }
 
+/* Donate priority to lock if applicable */
 void donate_priority() {
   int depth = 0;
   struct thread *t = thread_current();
@@ -686,6 +686,7 @@ void donate_priority() {
     ++depth;
     if (l->holder == NULL) { return; } //no thread holding lock rn
     if (l->holder->priority >= t->priority) { return; } //lock holder priority higher than current
+    l->holder->priority = t->priority; //thread priority higher than lock priority
     l = t->wait_on_lock;
   }
 }

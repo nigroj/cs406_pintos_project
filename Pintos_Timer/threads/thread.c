@@ -259,7 +259,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_insert_ordered (&ready_list, &t->elem, (list_less_func *) &change_priority, NULL);
+  list_insert_ordered (&ready_list, &t->elem, (list_less_func *) &compare_priority, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -330,7 +330,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
-    list_insert_ordered (&ready_list, &cur->elem, (list_less_func *) &change_priority, NULL);
+    list_insert_ordered (&ready_list, &cur->elem, (list_less_func *) &compare_priority, NULL);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -368,7 +368,7 @@ thread_set_priority (int new_priority)
   if (old_pri < thread_current()->priority) {
     donate_priority();
   } else if (old_pri > thread_current()->priority) {
-    test_yield;
+    check_yield_cpu();
   }
 
   intr_set_level(old_level);
@@ -655,7 +655,7 @@ void check_yield_cpu(void) {
   if(list_empty(&ready_list))
     return;
 
-  t = list_entry(list_front(&ready_list), struct thread, elem)
+  t = list_entry(list_front(&ready_list), struct thread, elem);
 
   if ((thread_current() -> priority) < t -> priority)
     thread_yield(); 
@@ -693,21 +693,21 @@ void donate_priority() {
 void remove_lock(struct lock *l) {
   struct list_elem *e = list_begin(&thread_current()->donation_list);
   struct thread *t;
-  while (e != list_end(&thread_current()->donation_list) { //iterate
+  while (e != list_end(&thread_current()->donation_list)) { //iterate
     t = list_entry(e, struct thread, donation_list_elem);
-    if (t->wait_on_lock == lock) {
+    if (t->wait_on_lock == l) {
       list_remove(e);
     }
     e = list_next(e);
   }
 }
 
-bool compare_priority (struct list_elem *a, struct list_elem *b) {
+int compare_priority (struct list_elem *a, struct list_elem *b) {
   struct thread *t1 = list_entry(a, struct thread, elem);
   struct thread *t2 = list_entry(b, struct thread, elem);
 
-  if (t1->priority > t2->priority) { return true;}
-  return false;
+  if (t1->priority > t2->priority) { return 1;}
+  return 0;
 }
 
 /* For timer_sleep */

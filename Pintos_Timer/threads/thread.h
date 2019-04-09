@@ -12,7 +12,6 @@ enum thread_status
     THREAD_READY,       /* Not running but ready to run. */
     THREAD_BLOCKED,     /* Waiting for an event to trigger. */
     THREAD_DYING,       /* About to be destroyed. */
-    THREAD_SLEEPING  /* For timer_sleep */
   };
 
 /* Thread identifier type.
@@ -96,6 +95,7 @@ struct thread
 
     struct list donation_list; 
     struct list_elem donation_list_elem; 
+    struct lock * wait_on_lock;
 
     // for thread set priority: 
     int init_priority; 
@@ -125,7 +125,7 @@ void check_yield_cpu(void);
 void update_priority(void);
 void donate_priority();
 void remove_lock(struct lock *);
-void compare_priority(struct list_elem, struct list_elem);
+int compare_priority(struct list_elem *, struct list_elem *);
 
 void thread_init (void);
 void thread_start (void);

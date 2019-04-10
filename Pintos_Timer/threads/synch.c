@@ -120,6 +120,10 @@ sema_up (struct semaphore *sema)
     thread_unblock (list_entry (list_pop_front (&sema->waiters),
                                 struct thread, elem));
   sema->value++;
+  
+  if (!intr_context())
+    test_yield(); 
+
   intr_set_level (old_level);
 }
 
@@ -159,7 +163,7 @@ sema_test_helper (void *sema_)
       sema_up (&sema[1]);
     }
 }
-
+
 /* Initializes LOCK.  A lock can be held by at most a single
    thread at any given time.  Our locks are not "recursive", that
    is, it is an error for the thread currently holding a lock to
@@ -210,6 +214,8 @@ lock_acquire (struct lock *lock)
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
   thread_current()->wait_on_lock = NULL;
+  lock->holder = thread_current(); 
+
   intr_set_level(old_level);
 }
 
@@ -230,9 +236,12 @@ lock_try_acquire (struct lock *lock)
   enum intr_level old_level = intr_disable();
 
   success = sema_try_down (&lock->semaphore);
-  if (success)
-    lock->holder = thread_current ();
+
+  if (success) {
     thread_current()->wait_on_lock = NULL;
+    lock->holder = thread_current ();
+  }
+
   intr_set_level(old_level);
   return success;
 }
@@ -249,11 +258,11 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
 
   enum intr_level old_level = intr_disable();
-
-  remove_lock(lock); //remove thread from donation list
-  update_priority(); //update thread priority
-
   lock->holder = NULL;
+
+  // remove_lock(lock); //remove thread from donation list
+  // update_priority(); //update thread priority
+  
   sema_up (&lock->semaphore);
   intr_set_level(old_level);
 }
@@ -268,7 +277,7 @@ lock_held_by_current_thread (const struct lock *lock)
 
   return lock->holder == thread_current ();
 }
-
+
 /* One semaphore in a list. */
 struct semaphore_elem 
   {
@@ -318,6 +327,7 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
   
   sema_init (&waiter.semaphore, 0);
+  
   list_insert_ordered (&cond->waiters, &waiter.elem, (list_less_func *)&compare_sem_priority, NULL);
   lock_release (lock);
   sema_down (&waiter.semaphore);

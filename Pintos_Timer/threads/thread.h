@@ -94,8 +94,8 @@ struct thread
     struct list_elem elem;              /* List element. */
 
     /* For priority */
-    struct list donation_list;
-    struct list_elem donation_list_elem;
+    struct list donation_list; //when the thread is the holder of the lock
+    struct list_elem donation_list_elem; //the element to be stored in donation list
     struct lock * wait_on_lock;
     int init_priority;
 

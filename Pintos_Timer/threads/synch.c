@@ -196,8 +196,18 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
+  enum intr_level old_level = intr_disable();
+
+  /* If the lock is already held, put the trying thread on wait and into lock's donation list */
+  if (lock->holder) {
+    thread_current()->wait_on_lock = lock;
+    list_insert_ordered(&lock->holder->donation_list, &thread_current()->donation_list_elem, (list_less_func *) &compare_priority, NULL);
+  }
+
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
+  thread_current()->wait_on_lock = NULL;
+  intr_set_level(old_level);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -214,9 +224,13 @@ lock_try_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!lock_held_by_current_thread (lock));
 
+  enum intr_level old_level = intr_disable();
+
   success = sema_try_down (&lock->semaphore);
   if (success)
     lock->holder = thread_current ();
+    thread_current()->wait_on_lock = NULL;
+  intr_set_level(old_level);
   return success;
 }
 

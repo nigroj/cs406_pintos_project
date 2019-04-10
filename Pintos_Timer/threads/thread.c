@@ -690,6 +690,7 @@ void donate_priority() {
   }
 }
 
+/* Remove a lock in the donation list after finished */
 void remove_lock(struct lock *l) {
   struct list_elem *e = list_begin(&thread_current()->donation_list);
   struct thread *t;
@@ -702,6 +703,7 @@ void remove_lock(struct lock *l) {
   }
 }
 
+/* For sorting ready list */
 int compare_priority (struct list_elem *a, struct list_elem *b) {
   struct thread *t1 = list_entry(a, struct thread, elem);
   struct thread *t2 = list_entry(b, struct thread, elem);

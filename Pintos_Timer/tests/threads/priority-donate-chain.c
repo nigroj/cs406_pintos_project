@@ -30,7 +30,7 @@
 #include "threads/synch.h"
 #include "threads/thread.h"
 
-#define NESTING_DEPTH 6
+#define NESTING_DEPTH 8
 
 struct lock_pair
   {

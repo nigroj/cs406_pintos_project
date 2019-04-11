@@ -1,0 +1,91 @@
+
+                         +-----------------+
+                         |      CS 406     |
+                         |   PROJECT ONE   |
+                         | DESIGN DOCUMENT |
+                         +-----------------+
+
+---- GROUP ----
+
+Angela Shi <shiy@lafayette.edu>
+James Nigro <nigroj@lafayette.edu>
+Ingrid Rumbaugh <rumbaughi@lafayette.edu>
+Kerry Stranick <stranick@lafayette.edu>
+
+---- PRELIMINARIES ----
+None.
+
+                                 TIMER_SLEEP
+                                     ====
+
+---- DATA STRUCTURES ----
+
+>> Copy here the declaration of each new or changed `struct' or `struct'
+>> member, global or static variable, `typedef', or enumeration.
+>> Identify the purpose of each in 25 words or less.
+
+Added a new static struct to hold sleeping threads:
+
+   /* Sleeping threads structure. */
+   static struct list sleeping_threads; 
+
+Added to struct thread:
+
+  /* Member for implementing timer_sleep() */
+  int64_t wakeup_time; /* When should the thread wake up? */
+
+---- ALGORITHMS ----
+
+>> Briefly describe your implementation of timer_sleep() and how it
+>> interacts with thread termination.
+
+timer_sleep() calls another function in thread.c named thread_real_sleep().
+thread_real_sleep() takes one parameter; the amount of ticks that the thread
+should sleep for. It then disables interrupts, puts the currently running
+thread's list element into the sleeping_threads list, and stores the
+thread's wakeup time (based on the previously mentioned number of ticks
+parameter). Finally, it blocks the thread using thread_block().
+
+In the schedule() method, a temporary thread is generated and the sleeping
+threads list is iterated through. If any thread in the list has a wakeup
+time that is earlier than the current time, it is removed from the sleeping
+threads list and unblocked using thread_unblock().
+
+---- SYNCHRONIZATION ----
+
+>> An operating system kernel is a complex, multithreaded program,
+>> in which synchronizing multiple threads can be difficult. How
+>> did you choose to synchronize timer_sleep()?
+
+When thread_real_sleep() is called, the currently running thread is blocked
+for the amount of time specified in the method call. When a thread is
+blocked, Pintos calls the scheduler to check if any of the other currently
+sleeping threads need to be woken up. If so, the first available sleeping
+thread is woken up and becomes the new currently running thread. If no
+sleeping threads need to be woken up, the scheduler chooses a new thread
+to continue running from the rest of the currently running threads and
+context switches to that thread. 
+
+Due to the fact that timer_sleep() is simply an adaptation of the previous
+sleep (in which a thread would spin and busy wait), there should be no
+race cases or special cases in its implementation.
+
+---- RATIONALE ----
+
+>> Critique your design, pointing out advantages and disadvantages in
+>> your design choices.
+
+This design has the advantage of simplicity.  Encapsulating most
+of the synchronization logic into a new "latch" structure
+abstracts what little complexity there is into a separate layer,
+making the design easier to reason about.  Also, all the new data
+members are in `struct thread', with no need for any extra dynamic
+allocation, etc., that would require extra management code.
+
+On the other hand, this design is wasteful in that a child thread
+cannot free itself before its parent has terminated.  A parent
+thread that creates a large number of short-lived child threads
+could unnecessarily exhaust kernel memory.  This is probably
+acceptable for implementing kernel threads, but it may be a bad
+idea for use with user processes because of the larger number of
+resources that user processes tend to own.

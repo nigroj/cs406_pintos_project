@@ -360,7 +360,7 @@ thread_set_priority (int new_priority)
   enum intr_level old_level = intr_disable();
 
   int old_pri = thread_get_priority();
-  thread_current() -> init_priority = new_priority;
+  thread_current() -> old_priority = new_priority;
 
   update_priority();
 
@@ -505,7 +505,7 @@ init_thread (struct thread *t, const char *name, int priority)
   //initialize priority scheduling values
   t->wait_on_lock = NULL;
   list_init(&t -> donation_list); 
-  t-> init_priority = priority; 
+  t-> old_priority = priority; 
 
   list_push_back (&all_list, &t->allelem);
 }
@@ -659,11 +659,10 @@ void check_yield_cpu(void) {
 }
 
 void update_priority(void) {
-  struct thread *cur_t;
-  struct thread *new_t; 
+  struct thread *cur_t, *new_t; 
 
   cur_t = thread_current();
-  cur_t -> priority = cur_t -> init_priority; // put cur_t's priority to init_priority
+  cur_t -> priority = cur_t -> old_priority; // change / restore cur_t's priority
 
   if (list_empty(&cur_t -> donation_list))
     return;
@@ -686,7 +685,7 @@ void donate_priority() {
     if (l->holder == NULL) { return; } //no thread holding lock rn
     if (l->holder->priority >= t->priority) { return; } //lock holder priority higher than current
     l->holder->priority = t->priority; //thread priority higher than lock priority
-    l = t->wait_on_lock;
+    t->wait_on_lock = l;
   }
 }
 

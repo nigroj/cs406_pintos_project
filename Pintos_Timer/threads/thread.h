@@ -96,8 +96,8 @@ struct thread
     /* For priority */
     struct list donation_list; //when the thread is the holder of the lock
     struct list_elem donation_list_elem; //the element to be stored in donation list
-    struct lock * wait_on_lock;
-    int init_priority;
+    struct lock * wait_on_lock; //the lock the thread is waiting for
+    int old_priority; //for saving & restoring priority before & after donation
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -122,7 +122,7 @@ extern bool thread_mlfqs;
 /* For priority */
 void check_yield_cpu(void); 
 void update_priority(void);
-void donate_priority();
+void donate_priority(void);
 void remove_lock(struct lock *);
 int compare_priority(struct list_elem *, struct list_elem *);
 

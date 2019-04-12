@@ -208,11 +208,9 @@ lock_acquire (struct lock *lock)
     thread_current()->wait_on_lock = lock;
     list_insert_ordered(&lock->holder->donation_list, &thread_current()->donation_list_elem, (list_less_func *) &compare_priority, NULL);
   }
-
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
   thread_current()->wait_on_lock = NULL;
-
   intr_set_level(old_level);
 }
 

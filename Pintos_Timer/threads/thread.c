@@ -212,8 +212,8 @@ thread_create (const char *name, int priority,
   sf->eip = switch_entry;
   sf->ebp = 0;
 
-  intr_set_level (old_level);
-
+  //intr_set_level (old_level);
+  old_level = intr_disable();
   /* Add to run queue. */
   thread_unblock (t);
 
@@ -375,8 +375,7 @@ thread_set_priority (int new_priority)
 /* Returns the current thread's priority. */
 int
 thread_get_priority (void) {
-  enum intr_level old_level; 
-  old_level = intr_disable();
+  enum intr_level old_level = intr_disable();
   int tmp = thread_current()->priority;
 
   intr_set_level(old_level); 

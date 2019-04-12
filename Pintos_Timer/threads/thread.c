@@ -359,9 +359,8 @@ thread_set_priority (int new_priority)
 {
   enum intr_level old_level = intr_disable();
 
-  int old_pri = thread_get_priority();
+  int old_pri = thread_current()->priority;
   thread_current() -> old_priority = new_priority;
-
   update_priority();
 
   if (old_pri < thread_current()->priority) { //priority raised
@@ -376,13 +375,13 @@ thread_set_priority (int new_priority)
 /* Returns the current thread's priority. */
 int
 thread_get_priority (void) {
-  /* Our implementation */ 
   enum intr_level old_level; 
-  old_level = intr_disable(); 
+  old_level = intr_disable();
+  int tmp = thread_current()->priority;
 
   intr_set_level(old_level); 
 
-  return thread_current ()->priority;
+  return tmp;
 }
 
 /* Sets the current thread's nice value to NICE. */
@@ -626,8 +625,6 @@ schedule (void)
     prev = switch_threads (cur, next);
   thread_schedule_tail (prev);
 
-
-
 }
 
 /* Returns a tid to use for a new thread. */
@@ -644,23 +641,22 @@ allocate_tid (void)
   return tid;
 }
 
-/* Offset of `stack' member within `struct thread' used by switch.S*/
+/* Offset of `stack' member within `struct thread'.
+   Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
 
 void check_yield_cpu(void) {
-  struct thread *t;
-
   if(list_empty(&ready_list))
     return;
 
-  t = list_entry(list_front(&ready_list), struct thread, elem);
-  if ((thread_current() -> priority) < t -> priority)
+  struct thread *t = list_entry(list_front(&ready_list), struct thread, elem);
+  if ((thread_current() -> priority) < t -> priority) {
     thread_yield(); 
+  }
 }
 
 void update_priority(void) {
-  struct thread *cur_t, *new_t; 
-
+  struct thread *cur_t, *new_t;
   cur_t = thread_current();
   cur_t -> priority = cur_t -> old_priority; // change / restore cur_t's priority
 
@@ -682,19 +678,22 @@ void donate_priority() {
 
   while (l && depth < DEPTH_LIMIT) {
     ++depth;
-    if (l->holder == NULL) { return; } //no thread holding lock rn
-    if (l->holder->priority >= t->priority) { return; } //lock holder priority higher than current
-    l->holder->priority = t->priority; //thread priority higher than lock priority
-    t->wait_on_lock = l;
+    if (!l->holder || l->holder->priority >= t->priority) {
+      return;
+    }
+    //if current thread priority higher than lock holder's
+    l->holder->priority = t->priority;
+    t = l->holder;
+    l = t->wait_on_lock;
   }
 }
 
 /* Remove a lock in the donation list after finished */
 void remove_lock(struct lock *l) {
   struct list_elem *e = list_begin(&thread_current()->donation_list);
-  struct thread *t;
-  while (e != list_end(&thread_current()->donation_list)) { //iterate
-    t = list_entry(e, struct thread, donation_list_elem);
+  //iterate through donation list
+  while (e != list_end(&thread_current()->donation_list)) {
+    struct thread *t = list_entry(e, struct thread, donation_list_elem);
     if (t->wait_on_lock == l) {
       list_remove(e);
     }

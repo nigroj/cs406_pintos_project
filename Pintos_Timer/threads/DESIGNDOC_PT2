@@ -43,20 +43,24 @@ Added to struct thread:
 
 A new thread (call it T1)'s priority is set when it is created in the thread_create() call.
 Once T1's priority is set, it temporarily becomes the currently running thread by making
-the currently running thread (call it T2) yield. T1's priority is checked against the
-priority of T2; if T1's priority is lower than T2's priority, it yields and T2 becomes the
-currently running thread again. Otherwise, T2 remains yielded and T1 resumes its execution.
+the currently running thread (call it T2) yield. T2 is placed at the head of a waiting list.
+T1's priority is checked against the priority of T2; if T1's priority is lower than T2's
+priority, it yields and T2 becomes the currently running thread again. Otherwise, T2
+remains yielded and T1 continues its execution.
 
-...
+Lock acquisition is also handled within our implementation of priority scheduling. When a
+thread tries to acquire a lock, it first checks if the lock is already held. If it is, the
+thread is placed into a list of threads that are waiting on the lock in question; if not,
+the sema_down() function is called. 
+
 
 
 ---- SYNCHRONIZATION ----
 
 >> An operating system kernel is a complex, multithreaded program,
 >> in which synchronizing multiple threads can be difficult. How
->> did you choose to synchronize timer_sleep()?
+>> did you choose to synchronize priority scheduling?
 
-...
 
 ---- RATIONALE ----
 

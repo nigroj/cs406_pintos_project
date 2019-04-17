@@ -9,11 +9,12 @@
 
 Angela Shi <shiy@lafayette.edu>
 James Nigro <nigroj@lafayette.edu>
-Ingrid Rumbaugh <rumbaughi@lafayette.edu>
+Ingrid Rumbaugh <rumbaugi@lafayette.edu>
 Kerry Stranick <stranick@lafayette.edu>
 
 ---- PRELIMINARIES ----
 Currently, this is an unfinished version of our design document of priority schedling.
+
 
                               PRIORITY SCHEDULING
                                      ====
@@ -51,9 +52,18 @@ remains yielded and T1 continues its execution.
 Lock acquisition is also handled within our implementation of priority scheduling. When a
 thread tries to acquire a lock, it first checks if the lock is already held. If it is, the
 thread is placed into a list of threads that are waiting on the lock in question; if not,
-the sema_down() function is called. 
+the sema_down() function is called. In sema_down(), we donate the current thread's priority
+to the lock holder's priority if the former's priority is higher than the latter's. We
+then block the current thread until the semaphore is available again, at which point it
+will get the lock and resume its execution.
 
-
+When a lock is released, all the threads that are waiting for it are removed from the
+donation list of the thread that held the lock. Then, the priority of the currently
+running thread is restored to its pre-donation priority. Lastly, we re-sort the list
+of waiters on the given semaphore and wake up the one with the highest priority. Since
+context switches are blocked during this process, we check again if the currently
+running thread needs to be blocked after we wake up the thread at the top of the
+waiting list.
 
 ---- SYNCHRONIZATION ----
 
@@ -61,10 +71,16 @@ the sema_down() function is called.
 >> in which synchronizing multiple threads can be difficult. How
 >> did you choose to synchronize priority scheduling?
 
+The threads are synchronized using semaphores and locks, as well as pausing context
+switches and interrupts. Pausing context switches and interrupts allows us to
+determine the priorities of the various threads before checking which thread becomes
+active, thus avoiding any possibility of low priority becoming the active thread.
+Our waiting lists, which are held by each individual thread as opposed to being part
+of a global structure, also help with keeping track of which threads are waiting on
+which locks without the possibility of being tampered with.
 
 ---- RATIONALE ----
 
 >> Critique your design, pointing out advantages and disadvantages in
 >> your design choices.
 
-...

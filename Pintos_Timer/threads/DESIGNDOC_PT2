@@ -86,4 +86,7 @@ which locks without the possibility of being tampered with.
 
 One of our advantages in the design is that all our lists are ordered so that it is
 easy to get the highest threads which are at the front of the lists. We also kept
-changes in data structures within one structure (struct thread) and one file (thread.c)
+changes in data structures within one structure (struct thread) and one file (thread.c).
+A disadvantage we have in our design code is our programming practice. The naming of 
+some of our functions and variables are not very consistent and therefore it is sometimes
+confusing to use them, especially across different files (thread.c and synch.c).

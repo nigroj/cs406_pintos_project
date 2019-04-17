@@ -90,3 +90,8 @@ changes in data structures within one structure (struct thread) and one file (th
 A disadvantage we have in our design code is our programming practice. The naming of 
 some of our functions and variables are not very consistent and therefore it is sometimes
 confusing to use them, especially across different files (thread.c and synch.c).
+
+We also could have edited the data structures (locks, semaphores, conditional variables)
+in synch.c and the algorithm would look very different. Although this different design
+does not necessarily ensure that it is more efficient than our current design, we did not
+have time to give more consideration on the choice of our design.

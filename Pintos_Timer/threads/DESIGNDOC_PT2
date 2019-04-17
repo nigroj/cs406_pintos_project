@@ -84,3 +84,6 @@ which locks without the possibility of being tampered with.
 >> Critique your design, pointing out advantages and disadvantages in
 >> your design choices.
 
+One of our advantages in the design is that all our lists are ordered so that it is
+easy to get the highest threads which are at the front of the lists. We also kept
+changes in data structures within one structure (struct thread) and one file (thread.c)

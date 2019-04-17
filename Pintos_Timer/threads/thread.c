@@ -682,7 +682,7 @@ void donate_priority() {
     }
     //if current thread priority higher than lock holder's
     l->holder->priority = t->priority;
-    t = l->holder;
+    //t = l->holder;
     l = t->wait_on_lock;
   }
 }
